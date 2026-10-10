@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
   BarChart,
@@ -91,7 +92,26 @@ const INITIAL_GOALS = [
   },
 ];
 
+
 export default function App() {
+  const navigate = useNavigate();
+
+  const savedUser = (() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("pennywise_user") || "null"
+      );
+    } catch {
+      return null;
+    }
+  })();
+
+  const userName = savedUser?.name?.trim() || "User";
+
+  const handleLogout = () => {
+    localStorage.removeItem("pennywise_logged_in");
+    navigate("/login", { replace: true });
+  };
   const [activePage, setActivePage] = useState("Dashboard");
 
   const [transactions, setTransactions] = useState(() =>
@@ -516,7 +536,7 @@ export default function App() {
     return (
       <>
         <div className="page-heading">
-          <h1>Welcome back! 👋</h1>
+          <h1>Welcome back, {userName}! 👋</h1>
           <p>Your financial overview and savings progress.</p>
         </div>
 
@@ -671,7 +691,75 @@ export default function App() {
         <div className="pw-card">
           <h3 className="section-title">Savings Goal Progress</h3>
 
-          {goals.length ? (
+<div className="pw-card" style={{ marginBottom: "20px" }}>
+  <h3 className="section-title">🔔 Budget Alerts</h3>
+
+  {budgets.filter((budget) => {
+    const spent = transactions
+      .filter(
+        (item) =>
+          item.type === "Expense" &&
+          item.category === budget.category
+      )
+      .reduce((sum, item) => sum + Number(item.amount), 0);
+
+    return spent >= budget.limit * 0.8;
+  }).length === 0 ? (
+    <p className="pw-muted">
+      All good! Your budgets are within the safe limit. 🎉
+    </p>
+  ) : (
+    budgets
+      .filter((budget) => {
+        const spent = transactions
+          .filter(
+            (item) =>
+              item.type === "Expense" &&
+              item.category === budget.category
+          )
+          .reduce((sum, item) => sum + Number(item.amount), 0);
+
+        return spent >= budget.limit * 0.8;
+      })
+      .map((budget) => {
+        const spent = transactions
+          .filter(
+            (item) =>
+              item.type === "Expense" &&
+              item.category === budget.category
+          )
+          .reduce((sum, item) => sum + Number(item.amount), 0);
+
+        const percentage = (spent / budget.limit) * 100;
+
+        return (
+          <p
+            key={budget.id}
+            style={{
+              padding: "12px",
+              borderRadius: "10px",
+              background:
+                spent > budget.limit ? "#fee2e2" : "#fef3c7",
+              color:
+                spent > budget.limit ? "#b91c1c" : "#92400e",
+              marginBottom: "8px",
+            }}
+          >
+            {spent > budget.limit
+              ? "🚨"
+              : "⚠️"}{" "}
+            <strong>{budget.category}:</strong>{" "}
+            {spent > budget.limit
+              ? `Budget exceeded by ₹${(spent - budget.limit).toFixed(2)}`
+              : `${percentage.toFixed(0)}% used — only ₹${(budget.limit - spent).toFixed(2)} remaining`}
+          </p>
+        );
+      })
+  )}
+</div>
+
+          {goals.length ? 
+          (
             <div className="goals-grid">
               {goals.slice(0, 3).map((goal) => (
                 <GoalCard key={goal.id} goal={goal} />
@@ -1201,6 +1289,17 @@ export default function App() {
             Set realistic goals and contribute a small amount regularly.
           </p>
         </div>
+        
+<button
+  type="button"
+  className="pw-nav"
+  onClick={handleLogout}
+  style={{ marginTop: "16px" }}
+>
+  <span className="nav-icon">↪</span>
+  Logout
+</button>
+
       </aside>
 
       <main className="pw-main">
