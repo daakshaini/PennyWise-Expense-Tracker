@@ -1,44 +1,51 @@
-# 💚 PennyWise — Personal Expense Tracker & Smart Budgeting App
+# 💰 PennyWise — Personal Expense Tracker & Smart Budgeting App
 
-PennyWise is a personal finance management web application designed to help users track their income and expenses, manage budgets, and monitor savings goals through a clean and user-friendly dashboard.
+PennyWise is a web-based personal finance application designed to help users track their income and expenses, manage budgets, monitor savings goals, and understand their spending habits through interactive charts.
 
 ## ✨ Features
 
-- **Dashboard:** View income, expenses, balance, and savings information.
-- **Transaction Management:** Add, search, and delete income and expense transactions.
-- **Budget Management:** Create and update budgets and monitor spending progress.
-- **Savings Goals:** Create financial goals and track contributions toward each target.
-- **Visual Analytics:** Understand financial activity through charts and graphs.
-- **Local Data Storage:** Save application data in the browser using localStorage.
-- **Responsive Design:** Use the interface across desktop and smaller screens.
+- 🔐 **User Authentication** — Signup and login pages with a personalized welcome message.
+- 📊 **Interactive Dashboard** — View key financial information and spending summaries.
+- 💸 **Transaction Management** — Track income and expenses.
+- 🎯 **Budget Management** — Create budgets and monitor spending by category.
+- 🚨 **Budget Alerts** — Receive visual warnings when spending approaches or exceeds a budget limit.
+- 🏦 **Savings Goals** — Set savings targets and monitor progress.
+- 📈 **Data Visualization** — Explore financial information through interactive charts.
+- 💾 **Local Data Persistence** — Save application data in browser local storage.
+- 🚪 **Logout** — End the current demo login session.
 
-## 🛠️ Technologies Used
+## 🛠️ Tech Stack
 
-- React
-- Vite
-- JavaScript
-- CSS
-- Recharts
-- Browser localStorage
+- **Frontend:** React.js
+- **Build Tool:** Vite
+- **Routing:** React Router
+- **Charts:** Recharts
+- **Styling:** CSS
+- **Storage:** Browser Local Storage
+- **Version Control:** Git and GitHub
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-Install Node.js and npm before running the project.
+Install the following tools:
+
+- [Node.js](https://nodejs.org/)
+- npm (included with Node.js)
+- [Git](https://git-scm.com/)
 
 ### Installation
 
 1. Clone the repository:
 
    ```bash
-   git clone YOUR_GITHUB_REPOSITORY_URL
+   git clone https://github.com/daakshaini/PennyWise-Expense-Tracker.git
    ```
 
-2. Open the project folder:
+2. Navigate to the project directory:
 
    ```bash
-   cd PennyWise
+   cd PennyWise-Expense-Tracker
    ```
 
 3. Install dependencies:
@@ -53,123 +60,69 @@ Install Node.js and npm before running the project.
    npm run dev
    ```
 
-5. Open the local URL displayed in your terminal.
+5. Open the local URL displayed in your terminal, usually `http://localhost:5173`.
 
-## 💡 How It Works
+## 📖 How to Use
 
-1. Open the dashboard to review your financial summary.
-2. Add income and expense transactions.
-3. Create budgets and monitor your spending.
-4. Set savings goals and record contributions.
-5. Review charts to understand your financial activity.
+1. Create an account using the signup page.
+2. Log in to access the dashboard.
+3. Add and manage your income and expense transactions.
+4. Set category-wise budgets and monitor your spending.
+5. Review budget alerts to identify overspending.
+6. Create savings goals and track your progress.
+7. Log out when you finish.
 
-## 💾 Data Storage
+## 🗂️ Project Structure
 
-PennyWise uses browser localStorage to retain transactions, budgets, and savings goals on the same browser. The current implementation does not use a backend database or cloud synchronization.
+```text
+PennyWise/
+├── src/
+│   ├── App.jsx
+│   ├── App.css
+│   ├── Router.jsx
+│   ├── Login.jsx
+│   ├── Signup.jsx
+│   ├── Auth.css
+│   └── main.jsx
+├── index.html
+├── package.json
+├── package-lock.json
+└── README.md
+```
 
-## 🎯 Project Objective
+*Note: The structure above highlights the main files. Your repository may contain additional files and folders.*
 
-The objective of PennyWise is to demonstrate how a web application can support personal financial organization through transaction management, budgeting, savings tracking, and visual analytics.
+## 🔒 Data & Security
 
-## 🔮 Future Enhancements
+PennyWise currently uses browser local storage for application data and demo authentication. This version is intended for learning and demonstration.
 
-- User authentication
-- Cloud database integration
-- Monthly budget alerts
-- Downloadable financial reports
-- Improved financial insights
+- Data is stored in the browser rather than a production database.
+- Local storage data may be lost if browser data is cleared.
+- Demo authentication is not suitable for protecting real financial information.
+- Do not enter real passwords or sensitive financial information.
 
-## 👩‍💻 Author
-
-Developed as an academic project.
-
----
-
-**PennyWise — Track Better. Save Smarter.** 💚# 💚 PennyWise — Personal Expense Tracker & Smart Budgeting App
-
-PennyWise is a personal finance management web application designed to help users track their income and expenses, manage budgets, and monitor savings goals through a clean and user-friendly dashboard.
-
-## ✨ Features
-
-- **Dashboard:** View income, expenses, balance, and savings information.
-- **Transaction Management:** Add, search, and delete income and expense transactions.
-- **Budget Management:** Create and update budgets and monitor spending progress.
-- **Savings Goals:** Create financial goals and track contributions toward each target.
-- **Visual Analytics:** Understand financial activity through charts and graphs.
-- **Local Data Storage:** Save application data in the browser using localStorage.
-- **Responsive Design:** Use the interface across desktop and smaller screens.
-
-## 🛠️ Technologies Used
-
-- React
-- Vite
-- JavaScript
-- CSS
-- Recharts
-- Browser localStorage
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-Install Node.js and npm before running the project.
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone YOUR_GITHUB_REPOSITORY_URL
-   ```
-
-2. Open the project folder:
-
-   ```bash
-   cd PennyWise
-   ```
-
-3. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-4. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open the local URL displayed in your terminal.
-
-## 💡 How It Works
-
-1. Open the dashboard to review your financial summary.
-2. Add income and expense transactions.
-3. Create budgets and monitor your spending.
-4. Set savings goals and record contributions.
-5. Review charts to understand your financial activity.
-
-## 💾 Data Storage
-
-PennyWise uses browser localStorage to retain transactions, budgets, and savings goals on the same browser. The current implementation does not use a backend database or cloud synchronization.
-
-## 🎯 Project Objective
-
-The objective of PennyWise is to demonstrate how a web application can support personal financial organization through transaction management, budgeting, savings tracking, and visual analytics.
+A production version should use secure authentication, server-side validation, and an appropriate database.
 
 ## 🔮 Future Enhancements
 
-- User authentication
-- Cloud database integration
-- Monthly budget alerts
-- Downloadable financial reports
-- Improved financial insights
+- Monthly and yearly financial reports
+- Export transactions to CSV or PDF
+- Improved search and filtering
+- Recurring transaction support
+- More advanced budgeting insights
+- Secure backend authentication and database integration
+- Responsive design improvements
+
+## 🎓 Project Purpose
+
+PennyWise is a student project created to explore frontend development, financial data management, interactive visualization, and budget tracking through a practical web application.
 
 ## 👩‍💻 Author
 
-Developed as an academic project.
+**Daakshaini**
 
----
+GitHub: [@daakshaini](https://github.com/daakshaini)
 
-**PennyWise — Track Better. Save Smarter.** 💚
+## 📄 License
+
+This project is available for educational and portfolio purposes. Add a formal license if you intend to specify permissions for reuse and distribution.
