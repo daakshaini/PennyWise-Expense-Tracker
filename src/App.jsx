@@ -1,110 +1,42 @@
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  LayoutDashboard,
-  ArrowLeftRight,
-  Wallet,
-  Target,
-  Settings,
-  Bell,
-  Search,
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  PiggyBank,
-  Menu,
-  X,
-  Coffee,
-  ShoppingBag,
-  Car,
-  Briefcase,
-  Utensils,
-  Trash2,
-  CalendarDays,
-  Save,
-  CreditCard,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-  ChevronRight,
-} from "lucide-react";
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+} from "recharts";
 import "./App.css";
 
-const KEYS = {
-  transactions: "pennywise_transactions",
-  budgets: "pennywise_budgets",
-  goals: "pennywise_goals",
-};
-
-const initialTransactions = [
-  {
-    id: 1,
-    title: "Monthly Salary",
-    category: "Salary",
-    date: "Oct 10, 2026",
-    amount: 45000,
-    type: "income",
-  },
-  {
-    id: 2,
-    title: "Groceries",
-    category: "Food & Drinks",
-    date: "Oct 09, 2026",
-    amount: 1850,
-    type: "expense",
-  },
-  {
-    id: 3,
-    title: "Coffee & Snacks",
-    category: "Food & Drinks",
-    date: "Oct 08, 2026",
-    amount: 240,
-    type: "expense",
-  },
-  {
-    id: 4,
-    title: "Travel",
-    category: "Transportation",
-    date: "Oct 07, 2026",
-    amount: 650,
-    type: "expense",
-  },
-  {
-    id: 5,
-    title: "Restaurant",
-    category: "Food & Drinks",
-    date: "Oct 06, 2026",
-    amount: 780,
-    type: "expense",
-  },
+const CATEGORIES = [
+  "Food", "Transport", "Shopping", "Bills",
+  "Health", "Education", "Entertainment",
+  "Salary", "Savings", "Other",
+];const COLORS = [
+  "#087f5b",
+  "#50b987",
+  "#9bd4b2",
+  "#246e50",
+  "#c9e8d4",
+  "#3a956d",
 ];
+const today = () => new Date().toISOString().slice(0, 10);
 
-const categories = [
-  "Food & Drinks",
-  "Transportation",
-  "Shopping",
-  "Bills",
-  "Education",
-  "Health",
-  "Entertainment",
-  "Salary",
-  "Other",
-];
-
-const defaultBudgets = [
-  { id: 1, category: "Food & Drinks", limit: 6000 },
-  { id: 2, category: "Transportation", limit: 3000 },
-  { id: 3, category: "Shopping", limit: 4000 },
-  { id: 4, category: "Bills", limit: 5000 },
-];
-
-const navigation = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "My Wallet", icon: Wallet },
-  { label: "Transactions", icon: ArrowLeftRight },
-  { label: "Budgets", icon: CreditCard },
-  { label: "Savings Goals", icon: Target },
-];
+const money = (amount) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(amount) || 0);
 
 function readStorage(key, fallback) {
   try {
@@ -115,272 +47,272 @@ function readStorage(key, fallback) {
   }
 }
 
-function App() {
+const INITIAL_TRANSACTIONS = [
+  {
+    id: 1,
+    title: "Monthly salary",
+    amount: 30000,
+    type: "Income",
+    category: "Salary",
+    date: today(),
+  },
+  {
+    id: 2,
+    title: "Groceries",
+    amount: 2500,
+    type: "Expense",
+    category: "Food",
+    date: today(),
+  },
+  {
+    id: 3,
+    title: "Transport",
+    amount: 1200,
+    type: "Expense",
+    category: "Transport",
+    date: today(),
+  },
+];
+
+const INITIAL_GOALS = [
+  {
+    id: 101,
+    name: "Emergency Fund",
+    targetAmount: 20000,
+    savedAmount: 5000,
+    deadline: "",
+  },
+  {
+    id: 102,
+    name: "New Laptop",
+    targetAmount: 50000,
+    savedAmount: 10000,
+    deadline: "",
+  },
+];
+
+export default function App() {
   const [activePage, setActivePage] = useState("Dashboard");
 
   const [transactions, setTransactions] = useState(() =>
-    readStorage(KEYS.transactions, initialTransactions)
+    readStorage("pennywise_transactions", INITIAL_TRANSACTIONS)
   );
 
   const [budgets, setBudgets] = useState(() =>
-    readStorage(KEYS.budgets, defaultBudgets)
+    readStorage("pennywise_budgets", [])
   );
 
   const [goals, setGoals] = useState(() =>
-    readStorage(KEYS.goals, [])
+    readStorage("pennywise_savings_goals", INITIAL_GOALS)
   );
 
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-
-  const [showForm, setShowForm] = useState(false);
-  const [showBudgetForm, setShowBudgetForm] = useState(false);
-  const [showGoalForm, setShowGoalForm] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
   const [notice, setNotice] = useState("");
 
-  const [form, setForm] = useState({
+  const [transactionForm, setTransactionForm] = useState({
     title: "",
     amount: "",
-    type: "expense",
-    category: "Food & Drinks",
+    type: "Expense",
+    category: "Food",
+    date: today(),
   });
 
   const [budgetForm, setBudgetForm] = useState({
-    category: "Food & Drinks",
+    category: "Food",
     limit: "",
   });
 
   const [goalForm, setGoalForm] = useState({
     name: "",
-    target: "",
-    saved: "",
+    targetAmount: "",
+    savedAmount: "0",
     deadline: "",
+  });
+
+  const [savingForm, setSavingForm] = useState({
+    goalId: "",
+    amount: "",
   });
 
   useEffect(() => {
     localStorage.setItem(
-      KEYS.transactions,
+      "pennywise_transactions",
       JSON.stringify(transactions)
     );
   }, [transactions]);
 
   useEffect(() => {
-    localStorage.setItem(KEYS.budgets, JSON.stringify(budgets));
+    localStorage.setItem(
+      "pennywise_budgets",
+      JSON.stringify(budgets)
+    );
   }, [budgets]);
 
   useEffect(() => {
-    localStorage.setItem(KEYS.goals, JSON.stringify(goals));
+    localStorage.setItem(
+      "pennywise_savings_goals",
+      JSON.stringify(goals)
+    );
   }, [goals]);
 
-  useEffect(() => {
-    if (!notice) return;
+  // AUTOMATIC INCOME, EXPENSE AND SAVINGS CALCULATIONS
 
-    const timer = setTimeout(() => setNotice(""), 3500);
+  const totalIncome = transactions
+    .filter((item) => item.type === "Income")
+    .reduce((sum, item) => sum + Number(item.amount), 0);
 
-    return () => clearTimeout(timer);
-  }, [notice]);
+  const totalExpenses = transactions
+    .filter((item) => item.type === "Expense")
+    .reduce((sum, item) => sum + Number(item.amount), 0);
 
-  const money = (amount) =>
-    "₹" +
-    Number(amount || 0).toLocaleString("en-IN", {
-      maximumFractionDigits: 2,
+  const balance = totalIncome - totalExpenses;
+
+  const availableSavings = Math.max(0, balance);
+
+  const totalGoalTarget = goals.reduce(
+    (sum, goal) => sum + Number(goal.targetAmount),
+    0
+  );
+
+  const totalGoalSaved = goals.reduce(
+    (sum, goal) => sum + Number(goal.savedAmount),
+    0
+  );
+
+  // CHART DATA
+
+  const categoryChartData = useMemo(() => {
+    const totals = {};
+
+    transactions
+      .filter((item) => item.type === "Expense")
+      .forEach((item) => {
+        totals[item.category] =
+          (totals[item.category] || 0) + Number(item.amount);
+      });
+
+    return Object.entries(totals).map(([name, value]) => ({
+      name,
+      value,
+    }));
+  }, [transactions]);
+
+  const monthlyChartData = useMemo(() => {
+    const totals = {};
+
+    transactions.forEach((item) => {
+      const date = new Date(`${item.date}T00:00:00`);
+
+      const month = date.toLocaleString("en-IN", {
+        month: "short",
+        year: "2-digit",
+      });
+
+      if (!totals[month]) {
+        totals[month] = {
+          month,
+          Income: 0,
+          Expenses: 0,
+        };
+      }
+
+      totals[month][
+        item.type === "Income" ? "Income" : "Expenses"
+      ] += Number(item.amount);
     });
 
-  const income = transactions
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    return Object.values(totals);
+  }, [transactions]);
 
-  const expenses = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const balance = income - expenses;
-
-  const savingsRate =
-    income > 0 ? Math.round((balance / income) * 100) : 0;
-
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((t) => {
-      const matchesSearch = `${t.title} ${t.category} ${t.date}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-      const matchesType =
-        typeFilter === "all" || t.type === typeFilter;
-
-      const matchesCategory =
-        categoryFilter === "all" ||
-        t.category === categoryFilter;
-
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesCategory
-      );
-    });
-  }, [transactions, search, typeFilter, categoryFilter]);
-
-  const spending = categories
-    .filter((category) => category !== "Salary")
-    .map((category) => ({
-      category,
-      amount: transactions
-        .filter(
-          (t) =>
-            t.type === "expense" &&
-            t.category === category
-        )
-        .reduce((sum, t) => sum + Number(t.amount), 0),
-    }))
-    .filter((item) => item.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
-
-  // Navigation fix: Workspace always opens Dashboard.
-  function changePage(page) {
-    setActivePage(page);
-    setMobileMenu(false);
-    setNotice("");
-  }
-
-  function getIcon(transaction) {
-    if (
-      transaction.type === "income" ||
-      transaction.category === "Salary"
-    ) {
-      return Briefcase;
-    }
-
-    if (transaction.category === "Food & Drinks") {
-      return Utensils;
-    }
-
-    if (transaction.category === "Transportation") {
-      return Car;
-    }
-
-    if (transaction.category === "Entertainment") {
-      return Coffee;
-    }
-
-    return ShoppingBag;
-  }
+  // ADD TRANSACTION
 
   function addTransaction(event) {
     event.preventDefault();
 
-    const amount = Number(form.amount);
-
     if (
-      !form.title.trim() ||
-      !Number.isFinite(amount) ||
-      amount <= 0
+      !transactionForm.title.trim() ||
+      Number(transactionForm.amount) <= 0
     ) {
-      setNotice(
-        "Please enter a valid transaction name and amount."
-      );
+      setNotice("Please enter a description and a valid amount.");
       return;
     }
 
-    const item = {
-      id: Date.now(),
-      title: form.title.trim(),
-      amount,
-      type: form.type,
-      category: form.category,
-      date: new Date().toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    };
+    setTransactions((current) => [
+      {
+        ...transactionForm,
+        id: Date.now(),
+        title: transactionForm.title.trim(),
+        amount: Number(transactionForm.amount),
+      },
+      ...current,
+    ]);
 
-    setTransactions((current) => [item, ...current]);
-
-    setForm({
+    setTransactionForm({
       title: "",
       amount: "",
-      type: "expense",
-      category: "Food & Drinks",
+      type: "Expense",
+      category: "Food",
+      date: today(),
     });
 
-    setShowForm(false);
-    setNotice("Transaction added successfully!");
+    setNotice("Transaction added successfully.");
   }
 
   function deleteTransaction(id) {
-    if (
-      !window.confirm(
-        "Do you want to delete this transaction?"
-      )
-    ) {
-      return;
-    }
-
     setTransactions((current) =>
-      current.filter((t) => t.id !== id)
+      current.filter((item) => item.id !== id)
     );
 
     setNotice("Transaction deleted.");
   }
 
-  function saveBudget(event) {
+  // ADD OR UPDATE BUDGET
+
+  function addBudget(event) {
     event.preventDefault();
 
-    const limit = Number(budgetForm.limit);
-
-    if (!Number.isFinite(limit) || limit <= 0) {
-      setNotice("Enter a valid budget amount.");
+    if (Number(budgetForm.limit) <= 0) {
+      setNotice("Please enter a valid budget limit.");
       return;
     }
 
-    setBudgets((current) => {
-      const exists = current.some(
-        (b) => b.category === budgetForm.category
-      );
-
-      return exists
-        ? current.map((b) =>
-            b.category === budgetForm.category
-              ? { ...b, limit }
-              : b
-          )
-        : [
-            ...current,
-            {
-              id: Date.now(),
-              category: budgetForm.category,
-              limit,
-            },
-          ];
-    });
+    setBudgets((current) => [
+      ...current.filter(
+        (item) => item.category !== budgetForm.category
+      ),
+      {
+        id: Date.now(),
+        category: budgetForm.category,
+        limit: Number(budgetForm.limit),
+      },
+    ]);
 
     setBudgetForm({
-      category: "Food & Drinks",
+      category: "Food",
       limit: "",
     });
 
-    setShowBudgetForm(false);
-    setNotice("Budget saved successfully!");
+    setNotice("Budget saved successfully.");
   }
 
-  function saveGoal(event) {
-    event.preventDefault();
+  // CREATE SAVINGS GOAL
 
-    const target = Number(goalForm.target);
-    const saved = Number(goalForm.saved || 0);
+  function addGoal(event) {
+    event.preventDefault();
 
     if (
       !goalForm.name.trim() ||
-      !Number.isFinite(target) ||
-      target <= 0 ||
-      !Number.isFinite(saved) ||
-      saved < 0
+      Number(goalForm.targetAmount) <= 0
     ) {
-      setNotice(
-        "Please enter valid savings goal details."
-      );
+      setNotice("Enter a goal name and a valid target amount.");
+      return;
+    }
+
+    if (
+      Number(goalForm.savedAmount) < 0 ||
+      Number(goalForm.savedAmount) > Number(goalForm.targetAmount)
+    ) {
+      setNotice("Saved amount must be between zero and the target.");
       return;
     }
 
@@ -389,1146 +321,563 @@ function App() {
       {
         id: Date.now(),
         name: goalForm.name.trim(),
-        target,
-        saved: Math.min(saved, target),
+        targetAmount: Number(goalForm.targetAmount),
+        savedAmount: Number(goalForm.savedAmount) || 0,
         deadline: goalForm.deadline,
       },
     ]);
 
     setGoalForm({
       name: "",
-      target: "",
-      saved: "",
+      targetAmount: "",
+      savedAmount: "0",
       deadline: "",
     });
 
-    setShowGoalForm(false);
-    setNotice("Savings goal created!");
+    setNotice("Savings goal created successfully.");
   }
 
-  function updateGoal(id, amount) {
-    const saved = Math.max(0, Number(amount) || 0);
+  // ADD MONEY TO A GOAL
 
-    setGoals((current) =>
-      current.map((g) =>
-        g.id === id
-          ? { ...g, saved: Math.min(saved, g.target) }
-          : g
-      )
+  function addSavings(event) {
+    event.preventDefault();
+
+    const amount = Number(savingForm.amount);
+
+    const selectedGoal = goals.find(
+      (goal) => String(goal.id) === String(savingForm.goalId)
     );
-  }
 
-  function deleteGoal(id) {
-    if (!window.confirm("Delete this savings goal?")) {
+    if (!selectedGoal || amount <= 0) {
+      setNotice("Select a goal and enter a valid amount.");
+      return;
+    }
+
+    if (amount > availableSavings) {
+      setNotice(
+        `You have only ${money(availableSavings)} available to save.`
+      );
+      return;
+    }
+
+    const remainingGoalAmount =
+      selectedGoal.targetAmount - selectedGoal.savedAmount;
+
+    if (amount > remainingGoalAmount) {
+      setNotice(
+        `This goal needs only ${money(remainingGoalAmount)} more.`
+      );
       return;
     }
 
     setGoals((current) =>
-      current.filter((g) => g.id !== id)
+      current.map((goal) =>
+        goal.id === selectedGoal.id
+          ? {
+              ...goal,
+              savedAmount: goal.savedAmount + amount,
+            }
+          : goal
+      )
     );
 
-    setNotice("Savings goal deleted.");
-  }
+    // Record the contribution as an expense so it is not
+    // counted again as available savings.
 
-  function transactionRows(items, showDelete = true) {
-    if (!items.length) {
-      return (
-        <div className="empty-state">
-          No transactions found. Try another search or add a
-          transaction.
-        </div>
-      );
-    }
+    setTransactions((current) => [
+      {
+        id: Date.now(),
+        title: `Savings contribution: ${selectedGoal.name}`,
+        amount,
+        type: "Expense",
+        category: "Savings",
+        date: today(),
+      },
+      ...current,
+    ]);
 
-    return items.map((t) => {
-      const Icon = getIcon(t);
-
-      return (
-        <div className="transaction-row" key={t.id}>
-          <div
-            className={`transaction-icon ${
-              t.type === "income" ? "transaction-income" : ""
-            }`}
-          >
-            <Icon size={19} />
-          </div>
-
-          <div className="transaction-info">
-            <strong>{t.title}</strong>
-            <span>
-              {t.category} · {t.date}
-            </span>
-          </div>
-
-          <strong
-            className={`transaction-amount ${
-              t.type === "income" ? "amount-income" : ""
-            }`}
-          >
-            {t.type === "income" ? "+" : "−"}
-            {money(t.amount)}
-          </strong>
-
-          {showDelete && (
-            <button
-              className="icon-button"
-              type="button"
-              title="Delete transaction"
-              onClick={() => deleteTransaction(t.id)}
-            >
-              <Trash2 size={16} />
-            </button>
-          )}
-        </div>
-      );
+    setSavingForm({
+      goalId: "",
+      amount: "",
     });
+
+    setNotice("Money added to your savings goal!");
   }
 
-  function budgetRows(items) {
-    if (!items.length) {
-      return (
-        <div className="empty-state">
-          No budgets yet. Create a budget to track spending.
-        </div>
-      );
-    }
+  const filteredTransactions = transactions.filter((item) =>
+    `${item.title} ${item.category} ${item.type}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
-    return items.map((budget, index) => {
-      const spent = transactions
-        .filter(
-          (t) =>
-            t.type === "expense" &&
-            t.category === budget.category
-        )
-        .reduce((sum, t) => sum + Number(t.amount), 0);
+  // REUSABLE COMPONENTS
 
-      const percentage = Math.min(
-        100,
-        (spent / budget.limit) * 100
-      );
-
-      const over = spent > budget.limit;
-
-      return (
-        <div className="budget-item" key={budget.id}>
-          <div className="budget-label">
-            <span>{budget.category}</span>
-            <strong>
-              {money(spent)} / {money(budget.limit)}
-            </strong>
-          </div>
-
-          <div className="progress-track">
-            <div
-              className={`progress-fill ${
-                over
-                  ? "bar-orange"
-                  : [
-                      "bar-green",
-                      "bar-purple",
-                      "bar-blue",
-                    ][index % 3]
-              }`}
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-
-          <div className="budget-note budget-actions">
-            <span
-              className={`note-dot ${
-                over ? "note-orange" : ""
-              }`}
-            />
-
-            <span>
-              {over
-                ? `Over budget by ${money(
-                    spent - budget.limit
-                  )}`
-                : `${money(
-                    budget.limit - spent
-                  )} remaining`}
-            </span>
-
-            <button
-              className="text-button"
-              onClick={() => {
-                const next = window.prompt(
-                  `New budget for ${budget.category}`,
-                  String(budget.limit)
-                );
-
-                if (
-                  next !== null &&
-                  Number.isFinite(Number(next)) &&
-                  Number(next) > 0
-                ) {
-                  setBudgets((current) =>
-                    current.map((b) =>
-                      b.id === budget.id
-                        ? { ...b, limit: Number(next) }
-                        : b
-                    )
-                  );
-
-                  setNotice("Budget updated.");
-                }
-              }}
-            >
-              Edit
-            </button>
-
-            <button
-              className="text-button danger-text"
-              onClick={() => {
-                setBudgets((current) =>
-                  current.filter((b) => b.id !== budget.id)
-                );
-
-                setNotice("Budget removed.");
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      );
-    });
-  }
-
-  function walletSummary() {
+  function StatCard({ title, amount, subtitle, icon, color }) {
     return (
-      <>
-        <section className="wallet-hero">
-          <div className="wallet-hero-top">
-            <div>
-              <span className="wallet-eyebrow">
-                PERSONAL ACCOUNT
-              </span>
-              <h2>My Wallet</h2>
-              <p>Your money, organised in one place.</p>
-            </div>
-
-            <div className="wallet-chip">
-              <CreditCard size={24} />
-            </div>
-          </div>
-
-          <span className="wallet-balance-label">
-            Available balance
+      <div className="pw-card stat-card">
+        <div className="stat-top">
+          <span>{title}</span>
+          <span
+            className="stat-icon"
+            style={{ color, background: `${color}18` }}
+          >
+            {icon}
           </span>
+        </div>
 
-          <div className="wallet-balance">
-            {money(balance)}
-          </div>
+        <div className="stat-value">{money(amount)}</div>
 
-          <div className="wallet-hero-bottom">
-            <span>
-              <span className="wallet-status-dot" />
-              Personal wallet
-            </span>
-            <span>INR · ₹</span>
-          </div>
-        </section>
+        <div className="pw-muted">{subtitle}</div>
+      </div>
+    );
+  }
 
-        <section className="stats-grid wallet-stats">
-          <article className="stat-card">
-            <div className="stat-top">
-              <span>Total income</span>
-              <span className="stat-icon income-icon">
-                <ArrowDownRight size={19} />
-              </span>
-            </div>
-            <div className="stat-value">{money(income)}</div>
-            <div className="stat-foot">
-              <span className="green-pill trend-pill">
-                Money received
-              </span>
-            </div>
-          </article>
+  function ProgressBar({ value }) {
+    const percentage = Math.min(100, Math.max(0, value));
 
-          <article className="stat-card">
-            <div className="stat-top">
-              <span>Total expenses</span>
-              <span className="stat-icon expense-icon">
-                <ArrowUpRight size={19} />
-              </span>
-            </div>
-            <div className="stat-value">
-              {money(expenses)}
-            </div>
-            <div className="stat-foot">
-              <span className="red-pill trend-pill">
-                Money spent
-              </span>
-            </div>
-          </article>
+    return (
+      <div
+        className="progress-track"
+        role="progressbar"
+        aria-valuenow={Math.round(percentage)}
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div
+          className="progress-fill"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    );
+  }
 
-          <article className="stat-card">
-            <div className="stat-top">
-              <span>Savings rate</span>
-              <span className="stat-icon income-icon">
-                <PiggyBank size={19} />
-              </span>
-            </div>
-            <div className="stat-value">
-              {savingsRate}%
-            </div>
-            <div className="stat-foot">
-              <span>Of recorded income</span>
-            </div>
-          </article>
-        </section>
+  function GoalCard({ goal }) {
+    const percentage = goal.targetAmount
+      ? Math.min(
+          100,
+          (goal.savedAmount / goal.targetAmount) * 100
+        )
+      : 0;
 
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Recent wallet activity</h2>
-              <p>Your latest income and expenses</p>
-            </div>
-
-            <button
-              className="text-button"
-              onClick={() => changePage("Transactions")}
-            >
-              View all →
-            </button>
-          </div>
-
-          <div className="transaction-list">
-            {transactionRows(transactions.slice(0, 6))}
+    return (
+      <div className="pw-card goal-card" key={goal.id}>
+        <div className="goal-heading">
+          <div>
+            <h3>{goal.name}</h3>
+            <p className="pw-muted">
+              {goal.deadline
+                ? `Target date: ${goal.deadline}`
+                : "No target date set"}
+            </p>
           </div>
 
           <button
-            className="primary-button wallet-add-button"
-            onClick={() => setShowForm(true)}
+            type="button"
+            className="pw-button danger-button"
+            onClick={() => {
+              setGoals((current) =>
+                current.filter((item) => item.id !== goal.id)
+              );
+              setNotice("Savings goal deleted.");
+            }}
           >
-            <Plus size={17} /> Add transaction
+            Delete
           </button>
-        </section>
-      </>
+        </div>
+
+        <div className="goal-amount">{money(goal.savedAmount)}</div>
+
+        <div className="pw-muted">
+          of {money(goal.targetAmount)} saved
+        </div>
+
+        <ProgressBar value={percentage} />
+
+        <div className="goal-progress-labels">
+          <strong>{percentage.toFixed(0)}% completed</strong>
+          <span>
+            {money(
+              Math.max(0, goal.targetAmount - goal.savedAmount)
+            )}{" "}
+            to go
+          </span>
+        </div>
+
+        {percentage >= 100 && (
+          <p className="goal-complete">🎉 Goal completed!</p>
+        )}
+      </div>
     );
   }
+
+  // DASHBOARD
 
   function dashboard() {
     return (
       <>
-        <section className="stats-grid">
-          <article className="stat-card balance-card">
-            <div className="stat-top">
-              <span>Total balance</span>
-              <span className="stat-icon balance-icon">
-                <Wallet size={19} />
-              </span>
-            </div>
+        <div className="page-heading">
+          <h1>Welcome back! 👋</h1>
+          <p>Your financial overview and savings progress.</p>
+        </div>
 
-            <div className="stat-value">{money(balance)}</div>
+        <div className="pw-grid">
+          <StatCard
+            title="Total Income"
+            amount={totalIncome}
+            subtitle="Money received"
+            icon="↗"
+            color="#16a34a"
+          />
 
-            <div className="stat-foot">
-              <span className="trend-pill">
-                <TrendingUp size={14} /> Live total
-              </span>
-              <span>Income minus expenses</span>
-            </div>
+          <StatCard
+            title="Total Expenses"
+            amount={totalExpenses}
+            subtitle="Includes savings contributions"
+            icon="↘"
+            color="#dc5252"
+          />
 
-            <div className="balance-decoration decoration-one" />
-            <div className="balance-decoration decoration-two" />
-          </article>
+          <StatCard
+            title="Current Balance"
+            amount={balance}
+            subtitle="Income minus expenses"
+            icon="◈"
+            color="#7c3aed"
+          />
 
-          <article className="stat-card">
-            <div className="stat-top">
-              <span>Total income</span>
-              <span className="stat-icon income-icon">
-                <TrendingUp size={19} />
-              </span>
-            </div>
+          <StatCard
+            title="Available Savings"
+            amount={availableSavings}
+            subtitle="Remaining amount available to save"
+            icon="♧"
+            color="#08916c"
+          />
+        </div>
 
-            <div className="stat-value">{money(income)}</div>
-
-            <div className="stat-foot">
-              <span className="trend-pill green-pill">
-                Money in
-              </span>
-              <span>Recorded income</span>
-            </div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-top">
-              <span>Total expenses</span>
-              <span className="stat-icon expense-icon">
-                <TrendingDown size={19} />
-              </span>
-            </div>
-
-            <div className="stat-value">
-              {money(expenses)}
-            </div>
-
-            <div className="stat-foot">
-              <span className="trend-pill red-pill">
-                Money out
-              </span>
-              <span>Recorded expenses</span>
-            </div>
-          </article>
-        </section>
-
-        <section className="insight-banner">
-          <div className="insight-symbol">
-            <Sparkles size={22} />
-          </div>
-
-          <div className="insight-copy">
-            <strong>A little insight for you</strong>
+        <div className="pw-card automatic-savings-card">
+          <div>
+            <span className="eyebrow">SMART SAVINGS</span>
+            <h2>Automatic Savings</h2>
             <p>
-              {income > 0
-                ? `Your current balance is ${savingsRate}% of your recorded income. Keep an eye on spending to reach your goals.`
-                : "Add income and expenses to unlock budgeting insights."}
+              Your available savings are calculated automatically
+              whenever you add income or expenses.
             </p>
           </div>
 
-          <span className="insight-tag">SMART TIP</span>
-        </section>
+          <div className="automatic-amount">
+            {money(availableSavings)}
+          </div>
 
-        <section className="content-grid">
-          <div className="panel transactions-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>Recent transactions</h2>
-                <p>Your latest money movements</p>
-              </div>
+          <button
+            className="pw-button"
+            onClick={() => setActivePage("Savings Goals")}
+          >
+            Manage savings goals →
+          </button>
+        </div>
 
-              <button
-                className="text-button"
-                onClick={() => changePage("Transactions")}
-              >
-                View all →
-              </button>
+        <div className="charts-grid">
+          <div className="pw-card chart-card">
+            <h3>Income vs Expenses</h3>
+
+            <div className="chart-area">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyChartData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#eee8f8"
+                  />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => money(value)} />
+                  <Legend />
+                  <Bar
+                    dataKey="Income"
+                    fill="#087f5b"
+                    radius={[5, 5, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="Expenses"
+                    fill="#9bd4b2"
+                    radius={[5, 5, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
+          </div>
 
-            <div className="transaction-list">
-              {transactionRows(
-                filteredTransactions.slice(0, 5),
-                false
+          <div className="pw-card chart-card">
+            <h3>Spending by Category</h3>
+
+            <div className="chart-area">
+              {categoryChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={85}
+                      label
+                    >
+                      {categoryChartData.map((item, index) => (
+                        <Cell
+                          key={item.name}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => money(value)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="pw-muted">
+                  Add expenses to see your spending chart.
+                </p>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="panel budget-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>Spending snapshot</h2>
-                <p>Expense breakdown</p>
-              </div>
-              <span className="mini-period">ALL TIME</span>
-            </div>
+        <div className="pw-card chart-card">
+          <h3>Monthly Spending Trend</h3>
 
-            <div className="spending-total">
-              {money(expenses)}
-              <span> spent</span>
-            </div>
-
-            {!spending.length ? (
-              <div className="empty-state">
-                Add expenses to see your spending breakdown.
-              </div>
-            ) : (
-              spending.slice(0, 5).map((item, index) => (
-                <div
-                  className="budget-item"
-                  key={item.category}
-                >
-                  <div className="budget-label">
-                    <span>{item.category}</span>
-                    <strong>{money(item.amount)}</strong>
-                  </div>
-
-                  <div className="progress-track">
-                    <div
-                      className={`progress-fill ${
-                        [
-                          "bar-green",
-                          "bar-orange",
-                          "bar-purple",
-                          "bar-blue",
-                        ][index % 4]
-                      }`}
-                      style={{
-                        width: `${
-                          expenses
-                            ? (item.amount / expenses) * 100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))
-            )}
-
-            <div className="budget-note">
-              <span className="note-dot" />
-              Based on recorded transactions
-            </div>
+          <div className="chart-area">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyChartData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#eee8f8"
+                />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => money(value)} />
+                <Line
+                  type="monotone"
+                  dataKey="Expenses"
+                  stroke="#087f5b"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        </section>
+        </div>
 
-        <section className="panel dashboard-budget-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Budget health</h2>
-              <p>Compare spending with category limits</p>
+        <div className="pw-card">
+          <h3 className="section-title">Savings Goal Progress</h3>
+
+          {goals.length ? (
+            <div className="goals-grid">
+              {goals.slice(0, 3).map((goal) => (
+                <GoalCard key={goal.id} goal={goal} />
+              ))}
             </div>
-
-            <button
-              className="text-button"
-              onClick={() => changePage("Budgets")}
-            >
-              Manage budgets →
-            </button>
-          </div>
-
-          {budgetRows(budgets.slice(0, 3))}
-        </section>
+          ) : (
+            <p className="pw-muted">
+              Create your first savings goal in Savings Goals.
+            </p>
+          )}
+        </div>
       </>
     );
   }
 
-  return (
-    <div className="app-shell">
-      {mobileMenu && (
-        <div
-          className="mobile-overlay"
-          onClick={() => setMobileMenu(false)}
-        />
-      )}
+  // TRANSACTIONS PAGE
 
-      <aside
-        className={`sidebar ${
-          mobileMenu ? "sidebar-open" : ""
-        }`}
-      >
-        <div className="brand">
-          <div className="brand-logo">
-            <Wallet size={23} />
-          </div>
-
-          <span>
-            Penny<span className="brand-accent">Wise</span>
-          </span>
-
-          <button
-            className="close-menu"
-            onClick={() => setMobileMenu(false)}
-            aria-label="Close menu"
-          >
-            <X size={20} />
-          </button>
+  function transactionsPage() {
+    return (
+      <>
+        <div className="page-heading">
+          <h1>Transactions</h1>
+          <p>
+            Add income or expenses. Your balance and savings update
+            automatically.
+          </p>
         </div>
 
-        <div className="workspace-label">WORKSPACE</div>
+        <form className="pw-card" onSubmit={addTransaction}>
+          <h3 className="section-title">Add transaction</h3>
 
-        <nav className="nav-list">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <button
-                key={item.label}
-                className={`nav-item ${
-                  activePage === item.label ? "nav-active" : ""
-                }`}
-                onClick={() => changePage(item.label)}
-              >
-                <Icon size={19} />
-                <span>{item.label}</span>
-
-                {item.label === "Transactions" && (
-                  <span className="nav-count">
-                    {transactions.length}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="upgrade-card">
-            <div className="upgrade-icon">
-              <PiggyBank size={23} />
-            </div>
-            <h3>Build better habits</h3>
-            <p>
-              Small savings today make a big difference tomorrow.
-            </p>
-          </div>
-
-          <button
-            className={`nav-item settings-item ${
-              activePage === "Settings" ? "nav-active" : ""
-            }`}
-            onClick={() => changePage("Settings")}
-          >
-            <Settings size={19} />
-            <span>Settings</span>
-          </button>
-
-          <button
-            className={`profile ${
-              activePage === "My Wallet" ? "profile-active" : ""
-            }`}
-            onClick={() => changePage("My Wallet")}
-            aria-label="Open My Wallet"
-          >
-            <div className="avatar">P</div>
-            <div className="profile-info">
-              <strong>My Wallet</strong>
-              <span>Personal account</span>
-            </div>
-            <ChevronRight
-              size={17}
-              className="profile-chevron"
-            />
-          </button>
-        </div>
-      </aside>
-
-      <main className="main-area">
-        <header className="topbar">
-          <button
-            className="menu-toggle"
-            onClick={() => setMobileMenu(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={22} />
-          </button>
-
-          {/* FIX: Workspace is now clickable and returns to Dashboard. */}
-          <div className="breadcrumb">
-            <button
-              type="button"
-              className="breadcrumb-home"
-              onClick={() => changePage("Dashboard")}
-              title="Go to Dashboard"
-            >
-              Workspace
-            </button>
-
-            <span>/</span>
-
-            <strong>{activePage}</strong>
-          </div>
-
-          <div className="topbar-actions">
-            
-<div className="search-box">
-  <Search size={17} />
-
-  <input
-    type="search"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        changePage("Transactions");
-      }
-      if (e.key === "Escape") {
-        setSearch("");
-      }
-    }}
-    placeholder="Search transactions..."
-    aria-label="Search transactions"
-  />
-
-  {search && (
-    <button
-      type="button"
-      className="icon-button"
-      onClick={() => setSearch("")}
-      title="Clear search"
-      aria-label="Clear search"
-    >
-      <X size={15} />
-    </button>
-  )}
-
-  <kbd>Enter</kbd>
-</div>
-            <button
-              className="top-avatar"
-              onClick={() => changePage("My Wallet")}
-              aria-label="Open wallet"
-            >
-              P
-            </button>
-          </div>
-        </header>
-
-        <div className="page-content">
-          <section className="welcome-row">
-            <div>
-              <div className="eyebrow">
-                <span className="live-dot" />
-                YOUR MONEY, IN FOCUS
-              </div>
-
-              <h1>
-                {activePage === "Dashboard"
-                  ? "Good money habits start here."
-                  : activePage}
-              </h1>
-
-              <p className="subtitle">
-                {activePage === "My Wallet"
-                  ? "Your personal account overview."
-                  : "Here's what's happening with your finances."}
-              </p>
-            </div>
-
-            <button
-              className="primary-button"
-              onClick={() => setShowForm(true)}
-            >
-              <Plus size={18} /> Add transaction
-            </button>
-          </section>
-
-          {notice && (
-            <div className="notice" role="status">
-              <span>{notice}</span>
-              <button
-                className="icon-button"
-                onClick={() => setNotice("")}
-                aria-label="Dismiss message"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-
-          {activePage === "Dashboard" && dashboard()}
-
-          {activePage === "My Wallet" && walletSummary()}
-
-          {activePage === "Transactions" && (
-            <section className="panel all-transactions">
-              <div className="panel-heading">
-                <div>
-                  <h2>All transactions</h2>
-                  <p>Search, filter, and manage your money</p>
-                </div>
-
-                <button
-                  className="primary-button"
-                  onClick={() => setShowForm(true)}
-                >
-                  <Plus size={17} /> Add new
-                </button>
-              </div>
-
-              <div className="filter-row">
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="all">All types</option>
-                  <option value="income">Income</option>
-                  <option value="expense">Expense</option>
-                </select>
-
-                <select
-                  value={categoryFilter}
-                  onChange={(e) =>
-                    setCategoryFilter(e.target.value)
-                  }
-                >
-                  <option value="all">All categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  className="secondary-button"
-                  onClick={() => {
-                    setTypeFilter("all");
-                    setCategoryFilter("all");
-                    setSearch("");
-                  }}
-                >
-                  Clear filters
-                </button>
-              </div>
-
-              {transactionRows(filteredTransactions)}
-            </section>
-          )}
-
-          {activePage === "Budgets" && (
-            <section className="panel">
-              <div className="panel-heading">
-                <div>
-                  <h2>Monthly budgets</h2>
-                  <p>
-                    Set spending limits for your categories
-                  </p>
-                </div>
-
-                <button
-                  className="primary-button"
-                  onClick={() => setShowBudgetForm(true)}
-                >
-                  <Plus size={17} /> Set budget
-                </button>
-              </div>
-
-              {budgetRows(budgets)}
-            </section>
-          )}
-
-          {activePage === "Savings Goals" && (
-            <section className="panel">
-              <div className="panel-heading">
-                <div>
-                  <h2>Your savings goals</h2>
-                  <p>
-                    Save toward the things that matter to you
-                  </p>
-                </div>
-
-                <button
-                  className="primary-button"
-                  onClick={() => setShowGoalForm(true)}
-                >
-                  <Plus size={17} /> New goal
-                </button>
-              </div>
-
-              {goals.length === 0 ? (
-                <div className="section-placeholder">
-                  <div className="section-icon">
-                    <Target size={25} />
-                  </div>
-
-                  <h2>Give your savings a purpose</h2>
-                  <p>
-                    Create a goal, set a target, and track your
-                    progress.
-                  </p>
-
-                  <button
-                    className="primary-button"
-                    onClick={() => setShowGoalForm(true)}
-                  >
-                    <Plus size={16} /> Create your first goal
-                  </button>
-                </div>
-              ) : (
-                <div className="goals-grid">
-                  {goals.map((goal) => {
-                    const percent = Math.min(
-                      100,
-                      (goal.saved / goal.target) * 100
-                    );
-
-                    return (
-                      <article
-                        className="goal-card"
-                        key={goal.id}
-                      >
-                        <div className="goal-card-top">
-                          <span className="goal-icon">
-                            <Target size={20} />
-                          </span>
-
-                          <button
-                            className="icon-button"
-                            onClick={() => deleteGoal(goal.id)}
-                            aria-label="Delete goal"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-
-                        <h3>{goal.name}</h3>
-
-                        <div className="goal-percent">
-                          {Math.round(percent)}
-                          <small>%</small>
-                        </div>
-
-                        <div className="progress-track">
-                          <div
-                            className="progress-fill bar-green"
-                            style={{
-                              width: `${percent}%`,
-                            }}
-                          />
-                        </div>
-
-                        <p>
-                          {money(goal.saved)} saved of{" "}
-                          {money(goal.target)}
-                        </p>
-
-                        {goal.deadline && (
-                          <div className="goal-deadline">
-                            <CalendarDays size={14} />
-                            Target date: {goal.deadline}
-                          </div>
-                        )}
-
-                        <label className="goal-update">
-                          Update saved amount (₹)
-                          <input
-                            type="number"
-                            min="0"
-                            max={goal.target}
-                            value={goal.saved}
-                            onChange={(e) =>
-                              updateGoal(
-                                goal.id,
-                                e.target.value
-                              )
-                            }
-                          />
-                        </label>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          )}
-
-          {activePage === "Settings" && (
-            <section className="panel settings-panel">
-              <div className="settings-header">
-                <span className="settings-big-icon">
-                  <Settings size={25} />
-                </span>
-
-                <div>
-                  <h2>Settings</h2>
-                  <p>Manage your PennyWise workspace</p>
-                </div>
-              </div>
-
-              <div className="settings-row">
-                <div>
-                  <strong>Currency</strong>
-                  <p>Indian Rupee (₹)</p>
-                </div>
-                <span className="settings-value">INR ₹</span>
-              </div>
-
-              <div className="settings-row">
-                <div>
-                  <strong>Data storage</strong>
-                  <p>Your data is saved in this browser.</p>
-                </div>
-                <span className="settings-value">
-                  Local storage
-                </span>
-              </div>
-
-              <div className="settings-row">
-                <div>
-                  <strong>Privacy</strong>
-                  <p>
-                    Clearing browser site data will remove saved
-                    transactions, budgets, and goals.
-                  </p>
-                </div>
-                <span className="settings-value">
-                  On device
-                </span>
-              </div>
-
-              <button
-                className="secondary-button reset-button"
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "Reset all data to the original demo data?"
-                    )
-                  ) {
-                    setTransactions(initialTransactions);
-                    setBudgets(defaultBudgets);
-                    setGoals([]);
-                    setSearch("");
-                    setTypeFilter("all");
-                    setCategoryFilter("all");
-                    setNotice("Demo data restored.");
-                  }
-                }}
-              >
-                Restore demo data
-              </button>
-            </section>
-          )}
-        </div>
-
-        <footer className="footer">
-          <span>© 2026 PennyWise</span>
-          <span>
-            Make every rupee count.{" "}
-            <span className="footer-heart">♥</span>
-          </span>
-        </footer>
-      </main>
-
-      {/* Add transaction modal */}
-      {showForm && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setShowForm(false)}
-        >
-          <form
-            className="transaction-modal"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={addTransaction}
-          >
-            <div className="modal-heading">
-              <div>
-                <h2>Add transaction</h2>
-                <p>Record your money movement</p>
-              </div>
-
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => setShowForm(false)}
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
+          <div className="form-grid">
             <label>
-              Transaction name
+              Description
               <input
-                required
-                maxLength="80"
-                autoFocus
-                placeholder="e.g. Electricity bill"
-                value={form.title}
+                className="pw-input"
+                value={transactionForm.title}
                 onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
+                  setTransactionForm({
+                    ...transactionForm,
+                    title: e.target.value,
+                  })
                 }
+                placeholder="e.g. Part-time salary"
+                required
               />
             </label>
 
             <label>
               Amount (₹)
               <input
-                required
+                className="pw-input"
                 type="number"
                 min="0.01"
                 step="0.01"
-                placeholder="0.00"
-                value={form.amount}
+                value={transactionForm.amount}
                 onChange={(e) =>
-                  setForm({ ...form, amount: e.target.value })
+                  setTransactionForm({
+                    ...transactionForm,
+                    amount: e.target.value,
+                  })
                 }
+                required
               />
             </label>
 
             <label>
-              Transaction type
+              Type
               <select
-                value={form.type}
-                onChange={(e) => {
-                  const type = e.target.value;
-
-                  setForm({
-                    ...form,
-                    type,
-                    category:
-                      type === "income"
-                        ? "Salary"
-                        : "Food & Drinks",
-                  });
-                }}
+                className="pw-input"
+                value={transactionForm.type}
+                onChange={(e) =>
+                  setTransactionForm({
+                    ...transactionForm,
+                    type: e.target.value,
+                  })
+                }
               >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
+                <option>Expense</option>
+                <option>Income</option>
               </select>
             </label>
 
             <label>
               Category
               <select
-                value={form.category}
+                className="pw-input"
+                value={transactionForm.category}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
+                  setTransactionForm({
+                    ...transactionForm,
                     category: e.target.value,
                   })
                 }
               >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
+                {CATEGORIES.map((category) => (
+                  <option key={category}>{category}</option>
                 ))}
               </select>
             </label>
 
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setShowForm(false)}
-              >
-                Cancel
-              </button>
+            <label>
+              Date
+              <input
+                className="pw-input"
+                type="date"
+                value={transactionForm.date}
+                onChange={(e) =>
+                  setTransactionForm({
+                    ...transactionForm,
+                    date: e.target.value,
+                  })
+                }
+                required
+              />
+            </label>
 
-              <button
-                type="submit"
-                className="primary-button"
-              >
-                <Plus size={17} /> Save transaction
-              </button>
-            </div>
-          </form>
+            <button className="pw-button" type="submit">
+              + Add transaction
+            </button>
+          </div>
+        </form>
+
+        <div className="pw-card">
+          <div className="table-heading">
+            <h3>Transaction history</h3>
+
+            <input
+              className="pw-input search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search transactions..."
+            />
+          </div>
+
+          <div className="table-scroll">
+            <table className="pw-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredTransactions.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.title}</td>
+                    <td>{item.category}</td>
+                    <td>{item.date}</td>
+                    <td>{item.type}</td>
+                    <td
+                      className={
+                        item.type === "Income"
+                          ? "income-text"
+                          : "expense-text"
+                      }
+                    >
+                      {item.type === "Income" ? "+" : "−"}
+                      {money(item.amount)}
+                    </td>
+                    <td>
+                      <button
+                        className="pw-button danger-button"
+                        type="button"
+                        onClick={() => deleteTransaction(item.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {!filteredTransactions.length && (
+              <p className="pw-muted">No transactions found.</p>
+            )}
+          </div>
         </div>
-      )}
+      </>
+    );
+  }
 
-      {/* Set budget modal */}
-      {showBudgetForm && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setShowBudgetForm(false)}
-        >
-          <form
-            className="transaction-modal"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={saveBudget}
-          >
-            <div className="modal-heading">
-              <div>
-                <h2>Set a budget</h2>
-                <p>Create or update a category limit</p>
-              </div>
+  // BUDGETS PAGE
 
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => setShowBudgetForm(false)}
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
+  function budgetsPage() {
+    return (
+      <>
+        <div className="page-heading">
+          <h1>Budgets</h1>
+          <p>Set spending limits and track category expenses.</p>
+        </div>
 
+        <form className="pw-card" onSubmit={addBudget}>
+          <h3 className="section-title">Create or update a budget</h3>
+
+          <div className="form-grid">
             <label>
               Category
               <select
+                className="pw-input"
                 value={budgetForm.category}
                 onChange={(e) =>
                   setBudgetForm({
@@ -1537,24 +886,21 @@ function App() {
                   })
                 }
               >
-                {categories
-                  .filter((c) => c !== "Salary")
-                  .map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
+                {CATEGORIES.filter(
+                  (category) =>
+                    category !== "Salary" && category !== "Savings"
+                ).map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
               </select>
             </label>
 
             <label>
-              Monthly limit (₹)
+              Budget limit (₹)
               <input
-                required
+                className="pw-input"
                 type="number"
                 min="1"
-                step="1"
-                placeholder="e.g. 5000"
                 value={budgetForm.limit}
                 onChange={(e) =>
                   setBudgetForm({
@@ -1562,104 +908,160 @@ function App() {
                     limit: e.target.value,
                   })
                 }
+                required
               />
             </label>
 
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setShowBudgetForm(false)}
-              >
-                Cancel
-              </button>
+            <button className="pw-button" type="submit">
+              Save budget
+            </button>
+          </div>
+        </form>
 
-              <button
-                type="submit"
-                className="primary-button"
-              >
-                <Save size={17} /> Save budget
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+        <div className="goals-grid">
+          {budgets.map((budget) => {
+            const spent = transactions
+              .filter(
+                (item) =>
+                  item.type === "Expense" &&
+                  item.category === budget.category
+              )
+              .reduce((sum, item) => sum + Number(item.amount), 0);
 
-      {/* Savings goal modal */}
-      {showGoalForm && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setShowGoalForm(false)}
-        >
-          <form
-            className="transaction-modal"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={saveGoal}
-          >
-            <div className="modal-heading">
-              <div>
-                <h2>Create savings goal</h2>
-                <p>
-                  Choose a target and track your progress
+            const percentage = budget.limit
+              ? Math.min(100, (spent / budget.limit) * 100)
+              : 0;
+
+            return (
+              <div className="pw-card" key={budget.id}>
+                <div className="goal-heading">
+                  <h3>{budget.category}</h3>
+                  <button
+                    className="pw-button danger-button"
+                    onClick={() =>
+                      setBudgets((current) =>
+                        current.filter((item) => item.id !== budget.id)
+                      )
+                    }
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <ProgressBar value={percentage} />
+
+                <p className="pw-muted">
+                  Spent {money(spent)} of {money(budget.limit)}
                 </p>
+
+                <strong
+                  className={
+                    spent > budget.limit ? "expense-text" : "income-text"
+                  }
+                >
+                  {spent > budget.limit
+                    ? "Budget exceeded"
+                    : `${money(budget.limit - spent)} remaining`}
+                </strong>
               </div>
+            );
+          })}
+        </div>
 
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => setShowGoalForm(false)}
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        {!budgets.length && (
+          <div className="pw-card pw-muted">
+            No budgets created yet.
+          </div>
+        )}
+      </>
+    );
+  }
 
+  // SAVINGS GOALS PAGE
+
+  function savingsGoalsPage() {
+    return (
+      <>
+        <div className="page-heading">
+          <h1>Savings Goals</h1>
+          <p>
+            Set targets, contribute from your available savings, and
+            track your progress.
+          </p>
+        </div>
+
+        <div className="pw-grid">
+          <StatCard
+            title="Available Savings"
+            amount={availableSavings}
+            subtitle="Income minus recorded expenses"
+            icon="♧"
+            color="#08916c"
+          />
+
+          <StatCard
+            title="Total Goal Targets"
+            amount={totalGoalTarget}
+            subtitle="Combined target amounts"
+            icon="◎"
+            color="#7c3aed"
+          />
+
+          <StatCard
+            title="Saved Toward Goals"
+            amount={totalGoalSaved}
+            subtitle="Across all savings goals"
+            icon="✓"
+            color="#16a34a"
+          />
+        </div>
+
+        <form className="pw-card" onSubmit={addGoal}>
+          <h3 className="section-title">Create a savings goal</h3>
+
+          <div className="form-grid">
             <label>
               Goal name
               <input
-                required
-                maxLength="80"
-                placeholder="e.g. New laptop"
+                className="pw-input"
                 value={goalForm.name}
                 onChange={(e) =>
-                  setGoalForm({
-                    ...goalForm,
-                    name: e.target.value,
-                  })
+                  setGoalForm({ ...goalForm, name: e.target.value })
                 }
+                placeholder="e.g. New laptop"
+                required
               />
             </label>
 
             <label>
               Target amount (₹)
               <input
-                required
+                className="pw-input"
                 type="number"
                 min="1"
-                step="1"
-                placeholder="e.g. 60000"
-                value={goalForm.target}
+                value={goalForm.targetAmount}
                 onChange={(e) =>
                   setGoalForm({
                     ...goalForm,
-                    target: e.target.value,
+                    targetAmount: e.target.value,
                   })
                 }
+                required
               />
             </label>
 
             <label>
               Already saved (₹)
               <input
+                className="pw-input"
                 type="number"
                 min="0"
-                step="1"
-                placeholder="0"
-                value={goalForm.saved}
+                value={goalForm.savedAmount}
                 onChange={(e) =>
                   setGoalForm({
                     ...goalForm,
-                    saved: e.target.value,
+                    savedAmount: e.target.value,
                   })
                 }
               />
@@ -1668,6 +1070,7 @@ function App() {
             <label>
               Target date (optional)
               <input
+                className="pw-input"
                 type="date"
                 value={goalForm.deadline}
                 onChange={(e) =>
@@ -1679,27 +1082,147 @@ function App() {
               />
             </label>
 
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setShowGoalForm(false)}
-              >
-                Cancel
-              </button>
+            <button className="pw-button" type="submit">
+              + Create goal
+            </button>
+          </div>
+        </form>
 
-              <button
-                type="submit"
-                className="primary-button"
+        <form className="pw-card contribution-card" onSubmit={addSavings}>
+          <h3 className="section-title">Add money to a goal</h3>
+
+          <p className="pw-muted">
+            Available savings:{" "}
+            <strong className="purple-text">
+              {money(availableSavings)}
+            </strong>
+            . Contributions are recorded as expenses to avoid counting
+            the same money twice.
+          </p>
+
+          <div className="form-grid">
+            <label>
+              Choose goal
+              <select
+                className="pw-input"
+                value={savingForm.goalId}
+                onChange={(e) =>
+                  setSavingForm({
+                    ...savingForm,
+                    goalId: e.target.value,
+                  })
+                }
+                required
               >
-                <Target size={17} /> Create goal
-              </button>
-            </div>
-          </form>
+                <option value="">Select a goal</option>
+
+                {goals
+                  .filter((goal) => goal.savedAmount < goal.targetAmount)
+                  .map((goal) => (
+                    <option key={goal.id} value={goal.id}>
+                      {goal.name} —{" "}
+                      {money(goal.targetAmount - goal.savedAmount)} left
+                    </option>
+                  ))}
+              </select>
+            </label>
+
+            <label>
+              Contribution (₹)
+              <input
+                className="pw-input"
+                type="number"
+                min="1"
+                step="0.01"
+                value={savingForm.amount}
+                onChange={(e) =>
+                  setSavingForm({
+                    ...savingForm,
+                    amount: e.target.value,
+                  })
+                }
+                required
+              />
+            </label>
+
+            <button className="pw-button" type="submit">
+              Add to savings
+            </button>
+          </div>
+        </form>
+
+        <div className="goals-grid">
+          {goals.map((goal) => (
+            <GoalCard key={goal.id} goal={goal} />
+          ))}
         </div>
-      )}
+
+        {!goals.length && (
+          <div className="pw-card pw-muted">
+            Create your first savings goal above.
+          </div>
+        )}
+      </>
+    );
+  }
+
+  const navigation = [
+    ["Dashboard", "⌂"],
+    ["Transactions", "↕"],
+    ["Budgets", "▤"],
+    ["Savings Goals", "♧"],
+  ];
+
+  return (
+    <div className="pennywise-app">
+      <aside className="pw-sidebar">
+        <div className="pw-brand">✦ PennyWise</div>
+
+        <div className="sidebar-label">WORKSPACE</div>
+
+        {navigation.map(([name, icon]) => (
+          <button
+            type="button"
+            key={name}
+            className={`pw-nav ${activePage === name ? "active" : ""}`}
+            onClick={() => {
+              setActivePage(name);
+              setNotice("");
+            }}
+          >
+            <span className="nav-icon">{icon}</span>
+            {name}
+          </button>
+        ))}
+
+        <div className="smart-tip">
+          <strong>Smart tip 💡</strong>
+          <p>
+            Set realistic goals and contribute a small amount regularly.
+          </p>
+        </div>
+      </aside>
+
+      <main className="pw-main">
+        <div className="breadcrumb">
+          PennyWise / <strong>{activePage}</strong>
+        </div>
+
+        {notice && (
+          <div className="pw-notice" role="status">
+            {notice}
+          </div>
+        )}
+
+        {activePage === "Dashboard" && dashboard()}
+        {activePage === "Transactions" && transactionsPage()}
+        {activePage === "Budgets" && budgetsPage()}
+        {activePage === "Savings Goals" && savingsGoalsPage()}
+
+        <footer className="pw-footer">
+          PennyWise • Spend mindfully, save consistently.
+        </footer>
+      </main>
     </div>
   );
 }
-
-export default App;
